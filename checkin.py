@@ -30,9 +30,11 @@ def main(force=False, no_deliver=False, initial=False):
     if not log:
         return
     cc.rebase()
+    first = initial
     for line in log.split('\x00'):
         id, comment = line.split('\x01')
-        statuses = getStatuses(id, initial)
+        statuses = getStatuses(id, first)
+        first = False
         checkout(statuses, comment.strip(), initial)
         tag(CI_TAG, id)
     if not no_deliver:
