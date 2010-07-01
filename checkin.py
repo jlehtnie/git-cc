@@ -9,7 +9,7 @@ from os.path import isdir
 import cache, reset
 
 IGNORE_CONFLICTS=False
-LOG_FORMAT = '%H%x01%s%n%b'
+LOG_FORMAT = '%H%x01%s (%aN)%n%b'
 
 ARGS = {
     'force': 'ignore conflicts and check-in anyway',
@@ -49,13 +49,14 @@ def getStatuses(id, initial):
         cmd.extend(['--pretty=format:', id])
     status = git_exec(cmd)
     status = status.strip()
+    status = status.strip('\x00')
     types = {'M':Modify, 'R':Rename, 'D':Delete, 'A':Add, 'C':Add}
     list = []
     split = status.split('\x00')
     while len(split) > 1:
-        char = split.pop(0)[0] # first char
-        args = [split.pop(0)]
-        if char == 'R':
+	char = split.pop(0)[0] # first char
+	args = [split.pop(0)]
+	if char == 'R':
             args.append(split.pop(0))
         elif char == 'C':
             args = [split.pop(0)]
@@ -69,15 +70,16 @@ def getStatuses(id, initial):
 def checkout(stats, comment, initial):
     """Poor mans two-phase commit"""
     transaction = ITransaction(comment) if initial else Transaction(comment)
+    
     for stat in stats:
-        try:
+   	try:
             stat.stage(transaction)
         except:
             transaction.rollback()
             raise
 
     for stat in stats:
-         stat.commit(transaction)
+        stat.commit(transaction)
     transaction.commit(comment);
 
 class ITransaction(object):
