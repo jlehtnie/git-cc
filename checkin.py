@@ -51,8 +51,8 @@ def getStatuses(id, initial):
         cmd.extend(['--pretty=format:', id])
     status = git_exec(cmd)
     status = status.strip()
-    status = status.strip('\x00')
-    types = {'M':Modify, 'R':Rename, 'D':Delete, 'A':Add, 'C':Add}
+    status = status.strip("\x00")
+    types = {'M':Modify, 'T':Modify, 'R':Rename, 'D':Delete, 'A':Add, 'C':Add}
     list = []
     split = status.split('\x00')
     while len(split) > 1:
