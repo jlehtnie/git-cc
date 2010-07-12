@@ -1,5 +1,6 @@
 from common import *
-from os.path import join, dirname
+from os.path import join, dirname, islink
+from os import symlink, rmdir
 
 class Status:
     def __init__(self, files):
@@ -8,7 +9,11 @@ class Status:
         self.file = file
     def cat(self):
         blob = git_exec(['cat-file', 'blob', getBlob(self.id, self.file)], decode=False)
-        write(join(CC_DIR, self.file), blob)
+	if islink(self.file):
+	   # TODO: can symlink be mkelem'd or do we need to use cleartool ln -s ?
+	   symlink(blob, join(CC_DIR, self.file))
+	else:
+            write(join(CC_DIR, self.file), blob)
     def stageDirs(self, t):
         dir = dirname(self.file)
         dirs = []
@@ -43,8 +48,18 @@ class Delete(Status):
     def stage(self, t):
         t.stageDir(dirname(self.file))
     def commit(self, t):
-        # TODO Empty dirs?!?
         cc_exec(['rm', self.file])
+	print "file: %s" % self.file
+	print "dir: %s" % dirname(self.file)
+	dir = dirname(self.file)
+	try:
+	    while dir:
+	    	rmdir(join(CC_DIR, dir))
+		# TODO: ct rm dir?
+		# TODO: avoid checkin in removed dirs?
+	    	dir = dirname(dir)
+	except OSError:
+	    print "dir is %s not empty" % dir
 
 class Rename(Status):
     def __init__(self, files):
