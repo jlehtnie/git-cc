@@ -9,7 +9,8 @@ from os.path import isdir
 import cache, reset
 
 IGNORE_CONFLICTS=False
-LOG_FORMAT = '%H%x01%s (%aN)%n%b'
+#TODO: Log format should be in config, not hardcoded
+LOG_FORMAT = '%H%x01%s (%aN)%n%b%ncommit hash: %H%nauthor:      %aN <%aE> %ncommitter:   %cN <%cE>%ncommit date: %ci'
 
 ARGS = {
     'force': 'ignore conflicts and check-in anyway',
@@ -90,6 +91,8 @@ class ITransaction(object):
         cc.mkact(comment)
     def add(self, file):
         self.checkedout.append(file)
+    def remove(self, file):
+    	self.checkedout.remove(file)
     def co(self, file):
         cc_exec(['co', '-reserved', '-nc', file])
         self.add(file)

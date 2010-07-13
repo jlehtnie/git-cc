@@ -9,6 +9,7 @@ if v30:
 else:
     from ConfigParser import SafeConfigParser
 
+CLEARTOOL = '/usr/atria/bin/cleartool'
 CFG_CC = 'clearcase'
 CC_DIR = None
 ENCODING = sys.stdin.encoding
@@ -33,7 +34,7 @@ def git_exec(cmd, **args):
     return popen('git', cmd, GIT_DIR, **args)
 
 def cc_exec(cmd, **args):
-    return popen('cleartool', cmd, CC_DIR, **args)
+    return popen(CLEARTOOL, cmd, CC_DIR, **args)
 
 def popen(exe, cmd, cwd, env=None, decode=True, errors=True):
     cmd.insert(0, exe)
